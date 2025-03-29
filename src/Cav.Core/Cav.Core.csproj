@@ -1,6 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <RepositoryUrl>https://github.com/ChernenkoAV/Cav.Core.git</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/ChernenkoAV/Cav.Core</PackageProjectUrl>
+
         <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
     </PropertyGroup>
 
