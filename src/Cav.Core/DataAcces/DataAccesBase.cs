@@ -9,14 +9,36 @@ namespace Cav.DataAcces;
 public class DataAccesBase : IDataAcces
 {
     /// <summary>
+    /// Дообработчик исключения при вызове команды. Если не сгенерирует новое исключение, то выбросится исходное
+    /// </summary>
+    /// <param name="exception"></param>
+    protected virtual void ExceptionHandling(Exception exception) { }
+
+    /// <summary>
+    /// Выполняется перед вызовом команды.
+    /// </summary>
+    /// <returns>Объект кореляции</returns>
+    protected virtual object? MonitorBefore() => null;
+
+    /// <summary>
+    /// Выполняется после вызова команды
+    /// </summary>
+    /// <param name="commandText">Текст команды</param>
+    /// <param name="corelationObject">Объект кореляции</param>
+    /// <param name="dbParameters">Параметры команды</param>
+    protected virtual void MonitorAfter(string commandText, object? corelationObject, DbParameter[] dbParameters) { }
+
+    /// <summary>
     /// Обработчик исключения пры запуске <see cref="DbCommand"/>. Должен генерировать новое исключение (Для обертки "страшных" сиключений в "нестрашные")
     /// </summary>
+    [Obsolete("Используйте переропределение метода ExceptionHandling")]
     public Action<Exception>? ExceptionHandlingExecuteCommand { get; set; }
 
     /// <summary>
     /// Метод, выполняемый перед выполнением <see cref="DbCommand"/>. Возвращаемое значение - объект кореляции вызовов (с <see cref="MonitorCommandAfterExecute"/>)
     /// </summary>
     /// <remarks>Метод выполняется обернутым в try cath.</remarks>
+    [Obsolete("Используйте переропределение метода MonitorBefore")]
     public Func<object?>? MonitorCommandBeforeExecute { get; set; }
     /// <summary>
     /// Метод, выполняемый после выполнения <see cref="DbCommand"/>.
@@ -25,18 +47,22 @@ public class DataAccesBase : IDataAcces
     /// <see cref="DbParameter"/>[] - копия параметров, с которыми отработала команда <see cref="DbCommand"/>.
     /// </summary>
     /// <remarks>Метод выполняется в отдельном потоке, обернутый в try cath.</remarks>
+    [Obsolete("Используйте переропределение метода ExceptionHandling")]
     public Action<string, object?, DbParameter[]>? MonitorCommandAfterExecute { get; set; }
 
     private void monitorHelperAfter(DbCommand command, object? objColrn)
     {
-        if (MonitorCommandAfterExecute == null)
-            return;
-
         var cmndText = command.CommandText;
         var dbParm = new DbParameter[command.Parameters.Count];
         if (command.Parameters.Count > 0)
             command.Parameters.CopyTo(dbParm, 0);
-        MonitorCommandAfterExecute(cmndText, objColrn, dbParm);
+
+#pragma warning disable CS0618 // Тип или член устарел
+        if (MonitorCommandAfterExecute is null)
+            MonitorAfter(cmndText, objColrn, dbParm);
+        else
+            MonitorCommandAfterExecute(cmndText, objColrn, dbParm);
+#pragma warning restore CS0618 // Тип или член устарел
     }
 
     /// <summary>
@@ -63,7 +89,11 @@ public class DataAccesBase : IDataAcces
 
         try
         {
-            var correlationObject = MonitorCommandBeforeExecute?.Invoke();
+#pragma warning disable CS0618 // Тип или член устарел
+            var correlationObject = MonitorCommandBeforeExecute is null
+                ? MonitorBefore()
+                : MonitorCommandBeforeExecute.Invoke();
+#pragma warning restore CS0618 // Тип или член устарел
 
             tuneCommand(cmd);
 
@@ -79,17 +109,19 @@ public class DataAccesBase : IDataAcces
         }
         catch (Exception ex)
         {
+#pragma warning disable CS0618 // Тип или член устарел
             if (ExceptionHandlingExecuteCommand != null)
                 ExceptionHandlingExecuteCommand(ex);
             else
-                throw;
+                ExceptionHandling(ex);
+#pragma warning restore CS0618 // Тип или член устарел
+
+            throw;
         }
         finally
         {
             DisposeConnection(cmd);
         }
-
-        throw new InvalidOperationException("При обработке исключения выполнения команды дальнейшее выполнение невозможно.");
     }
 
     /// <summary>
@@ -112,22 +144,22 @@ public class DataAccesBase : IDataAcces
     #endregion
 
     #region ExecuteReader
-    private async Task<DbDataReader> executeReader(DbCommand cmd, CancellationToken? cancellationToken = null)
+    private async Task<DbDataReader> executeReader(DbCommand cmd, CancellationToken cancellationToken = default)
     {
         if (cmd is null)
             throw new ArgumentNullException(nameof(cmd));
 
         try
         {
-            var correlationObject = MonitorCommandBeforeExecute?.Invoke();
+#pragma warning disable CS0618 // Тип или член устарел
+            var correlationObject = MonitorCommandBeforeExecute is null
+               ? MonitorBefore()
+               : MonitorCommandBeforeExecute.Invoke();
+#pragma warning restore CS0618 // Тип или член устарел
 
             tuneCommand(cmd);
 
-#pragma warning disable CA1849 // Вызов асинхронных методов в методе async
-            var res = cancellationToken == null
-                ? cmd.ExecuteReader()
-                : await cmd.ExecuteReaderAsync(cancellationToken.Value);
-#pragma warning restore CA1849 // Вызов асинхронных методов в методе async
+            var res = await cmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
 
             monitorHelperAfter(cmd, correlationObject);
 
@@ -135,13 +167,15 @@ public class DataAccesBase : IDataAcces
         }
         catch (Exception ex)
         {
+#pragma warning disable CS0618 // Тип или член устарел
             if (ExceptionHandlingExecuteCommand != null)
                 ExceptionHandlingExecuteCommand(ex);
             else
-                throw;
-        }
+                ExceptionHandling(ex);
+#pragma warning restore CS0618 // Тип или член устарел
 
-        throw new InvalidOperationException("При обработке исключения выполнения команды дальнейшее выполнение невозможно.");
+            throw;
+        }
     }
 
     /// <summary>
@@ -172,7 +206,11 @@ public class DataAccesBase : IDataAcces
 
         try
         {
-            var correlationObject = MonitorCommandBeforeExecute?.Invoke();
+#pragma warning disable CS0618 // Тип или член устарел
+            var correlationObject = MonitorCommandBeforeExecute is null
+               ? MonitorBefore()
+               : MonitorCommandBeforeExecute.Invoke();
+#pragma warning restore CS0618 // Тип или член устарел
 
             tuneCommand(cmd);
 
@@ -188,10 +226,14 @@ public class DataAccesBase : IDataAcces
         }
         catch (Exception ex)
         {
+#pragma warning disable CS0618 // Тип или член устарел
             if (ExceptionHandlingExecuteCommand != null)
                 ExceptionHandlingExecuteCommand(ex);
             else
-                throw;
+                ExceptionHandling(ex);
+#pragma warning restore CS0618 // Тип или член устарел
+
+            throw;
         }
         finally
         {
@@ -221,7 +263,7 @@ public class DataAccesBase : IDataAcces
 
     #region FillTable
 
-    private async Task<DataTable> fillTable(DbCommand cmd, CancellationToken? cancellationToken = null)
+    private async Task<DataTable> fillTable(DbCommand cmd, CancellationToken cancellationToken = default)
     {
         if (cmd is null)
             throw new ArgumentNullException(nameof(cmd));
@@ -239,8 +281,6 @@ public class DataAccesBase : IDataAcces
         {
             DisposeConnection(cmd);
         }
-
-        throw new InvalidOperationException("При обработке исключения выполнения команды дальнейшее выполнение невозможно.");
     }
 
     /// <summary>

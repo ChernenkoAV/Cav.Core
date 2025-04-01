@@ -43,21 +43,7 @@ public class DataAccesBase<TRow, TSelectParams, TUpdateParams, TDeleteParams> : 
     /// Добавить объект в БД
     /// </summary>
     /// <param name="newObj">Экземпляр объекта, который необходимо добавит в БД</param>
-    public void Add(TRow newObj)
-    {
-        Configured();
-
-        var execCom = addParamToCommand(CommandActionType.Insert, insertExpression, newObj);
-        if (insertPropKeyFieldMap.Any())
-        {
-            using var resExec = FillTable(execCom);
-            foreach (var dbrow in resExec.Rows.Cast<DataRow>())
-                foreach (var ff in insertPropKeyFieldMap)
-                    ff.Value(newObj, dbrow);
-        }
-        else
-            ExecuteNonQuery(execCom);
-    }
+    public void Add(TRow newObj) => AddAsync(newObj).GetAwaiter().GetResult();
 
     private ConcurrentDictionary<string, Action<TRow, DataRow>> insertPropKeyFieldMap = new();
     private LambdaExpression? insertExpression;
@@ -128,13 +114,7 @@ public class DataAccesBase<TRow, TSelectParams, TUpdateParams, TDeleteParams> : 
     /// Удаление по предикату 
     /// </summary>
     /// <param name="deleteParams"></param>
-    public void Delete(Expression<Action<TDeleteParams>> deleteParams)
-    {
-        Configured();
-
-        var execCom = addParamToCommand(CommandActionType.Delete, deleteParams);
-        ExecuteNonQuery(execCom);
-    }
+    public void Delete(Expression<Action<TDeleteParams>> deleteParams) => DeleteAsync(deleteParams).GetAwaiter().GetResult();
 
     /// <summary>
     /// Сопоставление объекта параметров удаления и параметров адаптера удаления
@@ -173,13 +153,7 @@ public class DataAccesBase<TRow, TSelectParams, TUpdateParams, TDeleteParams> : 
     /// Обновление данных
     /// </summary>
     /// <param name="updateParams"></param>
-    public void Update(Expression<Action<TUpdateParams>> updateParams)
-    {
-        Configured();
-
-        var execCom = addParamToCommand(CommandActionType.Update, updateParams);
-        ExecuteNonQuery(execCom);
-    }
+    public void Update(Expression<Action<TUpdateParams>> updateParams) => UpdateAsync(updateParams).GetAwaiter().GetResult();
 
     /// <summary>
     /// Сопоставление свойств класса параметров обновления и параметров адаптера
