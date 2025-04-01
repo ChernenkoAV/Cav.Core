@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Reflection;
 using System.Text;
 
@@ -25,23 +24,16 @@ public static class ExceptionExt
         builder.AppendLine(ex.Message);
 
         if (ex.Data.Count > 0)
-        {
-#pragma warning disable IDE0220 // Добавить явное приведение
-            foreach (DictionaryEntry de in ex.Data)
-                builder.AppendLine($"{de.Key}: {de.Value}");
-#pragma warning restore IDE0220 // Добавить явное приведение
-        }
+            foreach (var key in ex.Data.Keys)
+                builder.AppendLine($"{key}: {ex.Data[key]}");
 
         if (refinedDecoding != null)
             builder.AppendLine(refinedDecoding(ex));
 
         builder.AppendLine($"Type: {ex.GetType().FullName}");
 
-        if (ex.TargetSite != null)
-            builder.AppendLine($"TargetSite: {ex.TargetSite}");
-
         if (!ex.StackTrace.IsNullOrWhiteSpace())
-            builder.AppendLine($"StackTrace->{ex.StackTrace}");
+            builder.AppendLine($"StackTrace: {ex.StackTrace}");
 
         if (ex is ReflectionTypeLoadException reflectEx && reflectEx.LoaderExceptions != null)
         {
