@@ -75,4 +75,26 @@ public static class CollectionExt
             yield return item;
         }
     }
+
+    /// <summary>
+    /// Выполнение действия над элементами коллекции с возвратом коллекции
+    /// </summary>
+    /// <typeparam name="T">Тип объектов коллекции</typeparam>
+    /// <param name="source">Исходная коллекция</param>
+    /// <param name="action">Действие над элементом</param>
+    /// <returns></returns>
+    public static IEnumerable<T> Do<T>(this IEnumerable<T> source, Func<T, Task> action)
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+
+        if (action == null)
+            throw new ArgumentNullException(nameof(action));
+
+        foreach (var item in source)
+        {
+            action(item).GetAwaiter().GetResult();
+            yield return item;
+        }
+    }
 }
