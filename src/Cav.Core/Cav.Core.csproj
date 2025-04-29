@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <RepositoryUrl>https://github.com/ChernenkoAV/Cav.Core.git</RepositoryUrl>
@@ -21,7 +21,7 @@
     </ItemGroup>
 
     <PropertyGroup>
-        <PackageVersion>11.1.1</PackageVersion>
+        <PackageVersion>11.1.2</PackageVersion>
         <Description>A set of utilities that facilitate routine operations</Description>
         <PackageTags>$(PackageTags) utils</PackageTags>
     </PropertyGroup>

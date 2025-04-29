@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using System.Linq.Expressions;
 using Cav.DataAcces;
 
@@ -76,18 +76,14 @@ public static class HeplerDataAcces
         if (val is DBNull)
             val = returnType.GetDefault();
 
+        if (conv != null)
+            return conv.DynamicInvoke(val);
+
         returnType = Nullable.GetUnderlyingType(returnType) ?? returnType;
 
-        if (conv == null && val != null && returnType.IsEnum)
-            val = Enum.Parse(returnType, val.ToString()!, true);
-
-        if (conv != null && (val != null || returnType.IsArray))
-            val = conv.DynamicInvoke(val);
-
-        if (val == null && !IsCanMappedDbType(returnType))
-            val = Activator.CreateInstance(returnType, true);
-
-        return val;
+        return val != null && returnType.IsEnum
+            ? Enum.Parse(returnType, val.ToString()!, true)
+            : val;
     }
 
 #pragma warning disable IDE0060 // Удалите неиспользуемый параметр
