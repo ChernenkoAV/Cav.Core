@@ -21,7 +21,7 @@
     </ItemGroup>
 
     <PropertyGroup>
-        <PackageVersion>11.1.2</PackageVersion>
+        <PackageVersion>11.2.0</PackageVersion>
         <Description>A set of utilities that facilitate routine operations</Description>
         <PackageTags>$(PackageTags) utils</PackageTags>
     </PropertyGroup>

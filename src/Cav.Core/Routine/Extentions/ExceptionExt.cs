@@ -60,4 +60,48 @@ public static class ExceptionExt
 
         return builder.ToString();
     }
+
+    /// <summary>
+    /// Добавление к исключению данных в словарь <see cref="Exception.Data"/>.
+    /// При наличии в словаре указанного ключа значение перезаписывается.
+    /// Если ключ = <see cref="StringExt.IsNullOrWhiteSpace(string?)"/> = <keyword>true</keyword>, то добавление не производится.
+    /// Производится json-сериализация <see cref="JsonExt.JsonSerialize(object?)"/> значения.
+    /// Если значение = <keyword>null</keyword>, то добавление не производится.
+    /// </summary>
+    /// <param name="ex">Исключение, в которое добавляются данные</param>
+    /// <param name="key">Строковое представление ключа</param>
+    /// <param name="val">Объект значения</param>
+    public static void DataAdd(this Exception ex, string? key, object? val) => ex.DataAdd(key, val.JsonSerialize());
+
+    /// <summary>
+    /// Добавление к исключению данных в словарь <see cref="Exception.Data"/>.
+    /// При наличии в словаре указанного ключа значение перезаписывается.
+    /// Если ключ = <see cref="StringExt.IsNullOrWhiteSpace(string?)"/> = <keyword>true</keyword>, то добавление не производится.
+    /// Если значение <see cref="StringExt.IsNullOrWhiteSpace(string?)"/> = <keyword>true</keyword>, то добавление не производится.
+    /// </summary>
+    /// <param name="ex">Исключение, в которое добавляются данные</param>
+    /// <param name="key">Строковое представление ключа</param>
+    /// <param name="val">Объект значения</param>
+    public static void DataAdd(this Exception ex, string? key, string? val)
+    {
+        if (ex is null || key.IsNullOrWhiteSpace() || val.IsNullOrWhiteSpace())
+            return;
+
+        if (ex.Data.Contains(key!))
+            ex.Data.Remove(key!);
+        ex.Data.Add(key!, val);
+    }
+
+#if NET8_0_OR_GREATER
+
+    /// <summary>
+    /// Добавление к исключению данных в словарь <see cref="Exception.Data"/>.
+    /// Для ключа используется имя члена, переданной в метод компилятором (если не указано вручную).
+    /// Далее вызывается метод <see cref="DataAdd(Exception, string, object)"/>
+    /// </summary>
+    /// <param name="ex">Исключение, в которое добавляются данные</param>
+    /// <param name="val">Объект значения</param>
+    /// <param name="argumentName">Имя члена</param>
+    public static void DataAdd(this Exception ex, object? val, [System.Runtime.CompilerServices.CallerArgumentExpression(nameof(val))] string argumentName = "") => ex.DataAdd(argumentName, val);
+#endif
 }
