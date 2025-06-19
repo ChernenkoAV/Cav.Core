@@ -97,4 +97,23 @@ public static class CollectionExt
             yield return item;
         }
     }
+
+    /// <summary>
+    /// Создание элемента и добавление его в коллекцию.
+    /// </summary>
+    /// <typeparam name="T">Тип элементов коллекции. Должен быть класс с открытым конструктором без параметров</typeparam>
+    /// <param name="colection">Коллекция</param>
+    /// <param name="init">Илициализатор нового экземляра элемента</param>
+    /// <returns>Созданный элемент</returns>
+    /// <exception cref="ArgumentNullException">коллекция = null</exception>
+    public static T AddNew<T>(this ICollection<T> colection, Action<T>? init = null) where T : class, new()
+    {
+        if (colection is null)
+            throw new ArgumentNullException(nameof(colection));
+
+        var res = Activator.CreateInstance<T>();
+        colection.Add(res);
+        init?.Invoke(res);
+        return res;
+    }
 }
