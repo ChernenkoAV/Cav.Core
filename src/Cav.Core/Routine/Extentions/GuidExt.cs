@@ -8,12 +8,10 @@ public static class GuidExt
     /// <summary>
     /// Получение короткой строки Guid
     /// </summary>
-    /// <param name="guid"></param>
+    /// <param name="gguid"></param>
     /// <returns></returns>
-#pragma warning disable CA1720 // Идентификатор содержит имя типа
-    public static string ToShortString(this Guid guid) =>
-#pragma warning restore CA1720 // Идентификатор содержит имя типа
-        Convert.ToBase64String(guid.ToByteArray()).TrimEnd('=').Replace('/', '_').Replace('+', '-');
+    public static string ToShortString(this Guid gguid) =>
+        Convert.ToBase64String(gguid.ToByteArray()).TrimEnd('=').Replace('/', '_').Replace('+', '-');
 
     /// <summary>
     /// Получение Guid из короткой строки
@@ -27,7 +25,7 @@ public static class GuidExt
         if (strGuid.IsNullOrWhiteSpace())
             return res;
 
-        strGuid = strGuid.Replace('_', '/').Replace('-', '+') + "====";
+        strGuid = strGuid.Replace('_', '/').Replace('-', '+') + "==";
 
         return new Guid(Convert.FromBase64String(strGuid));
     }
