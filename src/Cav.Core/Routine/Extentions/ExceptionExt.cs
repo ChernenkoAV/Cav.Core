@@ -62,34 +62,52 @@ public static class ExceptionExt
     }
 
     /// <summary>
-    /// Добавление к исключению данных в словарь <see cref="Exception.Data"/>.
-    /// При наличии в словаре указанного ключа значение перезаписывается.
-    /// Если ключ = <see cref="StringExt.IsNullOrWhiteSpace(string?)"/> = <keyword>true</keyword>, то добавление не производится.
-    /// Производится json-сериализация <see cref="JsonExt.JsonSerialize(object?)"/> значения.
-    /// Если значение = <keyword>null</keyword>, то добавление не производится.
+    /// Получение словаря <see cref="Exception.Data"/> в виде перечесления пар ключ-значение
     /// </summary>
-    /// <param name="ex">Исключение, в которое добавляются данные</param>
-    /// <param name="key">Строковое представление ключа</param>
-    /// <param name="val">Объект значения</param>
-    public static void DataAdd(this Exception ex, string? key, object? val) => ex.DataAdd(key, val.JsonSerialize());
+    /// <param name="ex"></param>
+    /// <returns></returns>
+    public static Dictionary<string, object?> GetData(this Exception ex)
+    {
+        if (ex is null)
+            return [];
+
+        var res = new Dictionary<string, object?>();
+
+        foreach (var item in ex.Data.Keys)
+            res.Add(item!.ToString()!, ex.Data[item]);
+
+        return res;
+    }
 
     /// <summary>
-    /// Добавление к исключению данных в словарь <see cref="Exception.Data"/>.
-    /// При наличии в словаре указанного ключа значение перезаписывается.
-    /// Если ключ = <see cref="StringExt.IsNullOrWhiteSpace(string?)"/> = <keyword>true</keyword>, то добавление не производится.
-    /// Если значение <see cref="StringExt.IsNullOrWhiteSpace(string?)"/> = <keyword>true</keyword>, то добавление не производится.
+    /// Добавление к исключению данных в словарь <see cref="Exception.Data"/>.<br/>
+    /// При наличии в словаре указанного ключа значение перезаписывается.<br/>
+    /// Если ключ <see cref="StringExt.IsNullOrWhiteSpace(string?)"/> = <keyword>true</keyword>, то добавление не производится.<br/>
+    /// Если значение <see cref="StringExt.IsNullOrWhiteSpace(string?)"/> = <keyword>true</keyword>, то добавление не производится.<br/>
+    /// Если значение <see cref="string"/> или <see cref="Guid"/> то берется <see cref="object.ToString"/>, иначе <see cref="JsonExt.JsonSerialize(object?)"/>
     /// </summary>
+    /// <typeparam name="T"></typeparam>
     /// <param name="ex">Исключение, в которое добавляются данные</param>
     /// <param name="key">Строковое представление ключа</param>
     /// <param name="val">Объект значения</param>
-    public static void DataAdd(this Exception ex, string? key, string? val)
+    public static void DataAdd<T>(this Exception ex, string? key, T? val)
     {
-        if (ex is null || key.IsNullOrWhiteSpace() || val.IsNullOrWhiteSpace())
+        if (ex is null || key.IsNullOrWhiteSpace() || val is null)
+            return;
+
+        var valStr = val switch
+        {
+            string s => s,
+            Guid g => g.ToString(),
+            _ => val.JsonSerialize()
+        };
+
+        if (valStr.IsNullOrWhiteSpace())
             return;
 
         if (ex.Data.Contains(key!))
             ex.Data.Remove(key!);
-        ex.Data.Add(key!, val);
+        ex.Data.Add(key!, valStr);
     }
 
 #if NET8_0_OR_GREATER
@@ -97,7 +115,6 @@ public static class ExceptionExt
     /// <summary>
     /// Добавление к исключению данных в словарь <see cref="Exception.Data"/>.
     /// Для ключа используется имя члена, переданной в метод компилятором (если не указано вручную).
-    /// Далее вызывается метод <see cref="DataAdd(Exception, string, object)"/>
     /// </summary>
     /// <param name="ex">Исключение, в которое добавляются данные</param>
     /// <param name="val">Объект значения</param>
