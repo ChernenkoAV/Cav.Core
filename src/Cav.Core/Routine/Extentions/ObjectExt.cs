@@ -164,13 +164,14 @@ public static class ObjectExt
 
     /// <summary>
     /// Техническая проверка на <see langword="null"/>. Для строки еще на <see cref="string.IsNullOrWhiteSpace(string)"/>
+    /// Ошибка в наименовании. Используйте ThrowIfNull
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="test"></param>
     /// <param name="paramName">Имя параметра или иной текст для исключения</param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException" />
-    [Obsolete("Ошибка в наименовании. Используйте ThrowIfNull")]
+    //[Obsolete("Ошибка в наименовании. Используйте ThrowIfNull")]
     public static T ChekNull<T>(this T? test, string? paramName) =>
         test == null || (test is string strTest && strTest.IsNullOrWhiteSpace())
             ? throw new ArgumentNullException(paramName)
@@ -178,13 +179,14 @@ public static class ObjectExt
 
     /// <summary>
     /// Техническая проверка на <see langword="null"/>. Для строки еще на <see cref="string.IsNullOrWhiteSpace(string)"/>
+    /// Ошибка в наименовании. Используйте ThrowIfNull
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="test"></param>
     /// <param name="paramName"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException">Имя параметра или иной текст для исключения</exception>
-    [Obsolete("Ошибка в наименовании. Используйте ThrowIfNullAsync")]
+   //[Obsolete("Ошибка в наименовании. Используйте ThrowIfNullAsync")]
     public static async Task<T> ChekNullAsync<T>([NotNull] this Task<T?> test, string? paramName) => (await test.ConfigureAwait(false)).ChekNull(paramName);
 
     /// <summary>
