@@ -216,11 +216,11 @@ public static class ObjectExt
     /// <returns></returns>
     /// <exception cref="ArgumentNullException">Имя параметра или иной текст для исключения</exception>
     public static async Task<T> ThrowIfNull<T>(
-        this Task<T?> argument,
+        [NotNull] this Task<T?> argument,
 #if NET8_0_OR_GREATER
         [CallerArgumentExpression(nameof(argument))]
 #endif
         string paramName = "") =>
-        (await argument.ThrowIfNull(nameof(argument)).ConfigureAwait(false)).ThrowIfNull(paramName);
+        (await argument.ConfigureAwait(false)).ThrowIfNull(paramName);
 
 }
