@@ -88,6 +88,22 @@ public static class AsyncExt
     /// <param name="source"></param>
     /// <param name="selector"></param>
     /// <returns></returns>
+    public static async Task<IEnumerable<TResult>> SelectAsync<TSource, TResult>(
+        this IEnumerable<TSource> source, Func<TSource, Task<TResult>> selector)
+    {
+        var res = new List<TResult>();
+        foreach (var item in source)
+            res.Add(await selector(item).ConfigureAwait(false));
+        return res;
+    }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="TSource"></typeparam>
+    /// <typeparam name="TResult"></typeparam>
+    /// <param name="source"></param>
+    /// <param name="selector"></param>
+    /// <returns></returns>
     public static async Task<IEnumerable<TResult>> SelectManyAsync<TSource, TResult>(this Task<IEnumerable<TSource>> source, Func<TSource, IEnumerable<TResult>> selector) =>
         (await source.ConfigureAwait(false)).SelectMany(selector);
     /// <summary>
