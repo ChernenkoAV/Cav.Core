@@ -23,9 +23,9 @@ public class DateConverter : IsoDateTimeConverter
     public DateConverter(string dateTimeFormat) => DateTimeFormat = dateTimeFormat;
 }
 
-internal class FlagEnumStringConverter : StringEnumConverter
+internal class EnumStringConverter : StringEnumConverter
 {
-    public FlagEnumStringConverter() => AllowIntegerValues = true;
+    public EnumStringConverter() => AllowIntegerValues = true;
 
     public override bool CanConvert(Type objectType) => base.CanConvert(objectType);
 
@@ -33,17 +33,15 @@ internal class FlagEnumStringConverter : StringEnumConverter
     {
         var enumType = Nullable.GetUnderlyingType(objectType) ?? objectType;
 
-        var isFlag = enumType.GetCustomAttribute<FlagsAttribute>() != null;
+        var values = reader.TokenType == JsonToken.StartArray
+            ? serializer.Deserialize<string[]>(reader)!
+            : [serializer.Deserialize<string>(reader)!];
 
-        return isFlag
-            ? reader.TokenType == JsonToken.Integer
-                ? Enum.ToObject(enumType, serializer.Deserialize<int>(reader))
-                : Enum.ToObject(
-                    enumType,
-                    serializer.Deserialize<string[]>(reader)!
-                        .Select(x => Enum.Parse(enumType, x))
-                        .Aggregate(0, (cur, val) => cur | (int)val))
-            : base.ReadJson(reader, enumType, existingValue, serializer);
+        values = [.. values.Where(x => !x.IsNullOrWhiteSpace())];
+
+        return values.Length == 0
+            ? null
+            : Enum.ToObject(enumType, values.Select(x => Enum.Parse(enumType, x)).Aggregate(0, (cur, val) => cur | (int)val));
     }
 
     public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
@@ -167,7 +165,7 @@ public class GenericJsonSerializerSetting : JsonSerializerSettings
     {
         NullValueHandling = NullValueHandling.Ignore;
         DefaultValueHandling = DefaultValueHandling.Ignore;
-        Converters.Add(new FlagEnumStringConverter());
+        Converters.Add(new EnumStringConverter());
         ContractResolver = new CustomJsonContractResolver();
     }
 }
