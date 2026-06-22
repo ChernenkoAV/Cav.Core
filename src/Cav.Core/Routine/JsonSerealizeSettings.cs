@@ -138,21 +138,14 @@ internal class CustomJsonContractResolver : DefaultContractResolver
 /// </summary>
 public class GenericJsonSerializerSetting : JsonSerializerSettings
 {
+#pragma warning disable IDE0032 // Использовать свойство auto
     private static GenericJsonSerializerSetting? instance;
+#pragma warning restore IDE0032 // Использовать свойство auto
 
     /// <summary>
     /// Получение экземпляра настроек
     /// </summary>
-    public static GenericJsonSerializerSetting Instance
-    {
-        get
-        {
-            if (instance == null)
-                instance = new GenericJsonSerializerSetting();
-
-            return instance;
-        }
-    }
+    public static GenericJsonSerializerSetting Instance => instance ??= new();
 
     internal GenericJsonSerializerSetting(
 #pragma warning disable SYSLIB0050 // Тип или член устарел

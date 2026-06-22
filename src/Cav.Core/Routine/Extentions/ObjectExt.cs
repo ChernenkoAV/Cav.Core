@@ -205,7 +205,7 @@ public static class ObjectExt
     string paramName = "") =>
         argument is null || (argument is string strTest && strTest.IsNullOrWhiteSpace())
             ? throw new ArgumentNullException(paramName)
-            : argument!;
+            : argument;
 
     /// <summary>
     /// Техническая проверка на <see langword="null"/>. Для строки еще на <see cref="string.IsNullOrWhiteSpace(string)"/>

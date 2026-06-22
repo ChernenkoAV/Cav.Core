@@ -195,10 +195,14 @@ public static class StringExt
     /// <param name="str">Исхоная строка</param>
     /// <param name="term">Терм замены</param>
     /// <returns></returns>
+#pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
     public static string? TrimStart2(this string? str, string? term) =>
-        string.IsNullOrEmpty(term) || string.IsNullOrEmpty(str) || !str!.StartsWith(term)
+        string.IsNullOrEmpty(term)
+        || string.IsNullOrEmpty(str)
+        || !str.StartsWith(term)
             ? str
-            : str[term!.Length..];
+            : str[term.Length..];
+#pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
 
     /// <summary>
     /// Принадлежность строки диапазону. Аналог BETWEEN для строк в SQL - если любой параметр предиката <see langword="null"/> - результат <see langword="false"/>.
