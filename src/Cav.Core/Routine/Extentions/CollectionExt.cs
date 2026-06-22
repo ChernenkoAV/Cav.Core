@@ -31,11 +31,11 @@ public static class CollectionExt
             vals = source.Distinct();
 
         if (!typeof(T).IsValueType)
-            vals = vals.Where(x => x != null).ToArray();
+            vals = [.. vals.Where(x => x != null)];
 
         format = format.GetNullIfIsNullOrWhiteSpace() ?? "{0}";
 
-        return string.Join(separator, vals.Select(x => string.Format(format, x)).ToArray());
+        return string.Join(separator, [.. vals.Select(x => string.Format(format, x))]);
     }
 
     /// <summary>

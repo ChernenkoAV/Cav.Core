@@ -103,7 +103,7 @@ public sealed class DbTransactionScope : IDisposable
             catch { }
 #endif
 
-            TransactionRollback?.Invoke(connName!);
+            TransactionRollback?.Invoke(connName);
         }
 
         if (rootTran.Value != currentTran)
@@ -119,9 +119,9 @@ public sealed class DbTransactionScope : IDisposable
             tran.Commit();
             tran.Dispose();
 
-            conn!.Dispose();
+            conn.Dispose();
 
-            TransactionCommit?.Invoke(connName!);
+            TransactionCommit?.Invoke(connName);
         }
     }
 

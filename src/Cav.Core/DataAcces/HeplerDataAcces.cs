@@ -82,7 +82,7 @@ public static class HeplerDataAcces
         returnType = Nullable.GetUnderlyingType(returnType) ?? returnType;
 
         return val != null && returnType.IsEnum
-            ? Enum.Parse(returnType, val.ToString()!, true)
+            ? Enum.Parse(returnType, val.ToString(), true)
             : val;
     }
 

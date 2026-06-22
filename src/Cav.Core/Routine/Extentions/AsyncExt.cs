@@ -113,7 +113,7 @@ public static class AsyncExt
     /// <param name="source"></param>
     /// <returns></returns>
     public static async Task<List<T>> ToListAsync<T>(
-        this Task<IEnumerable<T>> source) => (await source.ConfigureAwait(false)).ToList();
+        this Task<IEnumerable<T>> source) => [.. await source.ConfigureAwait(false)];
     /// <summary>
     /// 
     /// </summary>

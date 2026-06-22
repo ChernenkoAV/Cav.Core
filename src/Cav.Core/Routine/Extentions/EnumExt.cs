@@ -31,9 +31,9 @@ public static class EnumExt
     /// <param name="flag"></param>
     /// <returns></returns>
     public static IEnumerable<T> FlagToList<T>(this T flag) where T : Enum =>
-        Enum.GetValues(flag.GetType())
+        [.. Enum.GetValues(flag.GetType())
             .Cast<T>()
-            .Where(x => Convert.ToInt64(x) != 0L && flag.HasFlag(x)).ToArray();
+            .Where(x => Convert.ToInt64(x) != 0L && flag.HasFlag(x))];
 
     /// <summary>
     /// Получение коллекции значений-описаний (атрибут <see cref="DescriptionAttribute"/>) для типа перечесления.
@@ -55,7 +55,7 @@ public static class EnumExt
         {
             var fi = enumType.GetField(enVal.ToString());
 
-            var description = fi!.GetCustomAttribute<DescriptionAttribute>()?.Description;
+            var description = fi.GetCustomAttribute<DescriptionAttribute>()?.Description;
 
             if (description.IsNullOrWhiteSpace() && skipEmptyDescription)
                 continue;

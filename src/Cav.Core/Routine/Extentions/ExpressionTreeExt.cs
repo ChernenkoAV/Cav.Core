@@ -42,9 +42,9 @@ public static class ExpressionTreeExt
     public static Expression XElementAddContentValue(this Expression instanseXElement, string newElementName, string xmlNamespace, Expression contentValue) =>
         Expression.Call(
             instanseXElement,
-            typeof(XElement).GetMethod(nameof(XElement.Add), [typeof(object)])!,
+            typeof(XElement).GetMethod(nameof(XElement.Add), [typeof(object)]),
             Expression.New(
-                typeof(XElement).GetConstructor([typeof(XName), typeof(object)])!,
+                typeof(XElement).GetConstructor([typeof(XName), typeof(object)]),
                 newElementName.XName(xmlNamespace),
                 Expression.Convert(contentValue, typeof(object))));
 
@@ -57,7 +57,7 @@ public static class ExpressionTreeExt
     public static Expression XElementAddContent(this Expression instanseXElement, Expression contentValue) =>
         Expression.Call(
             instanseXElement,
-            typeof(XElement).GetMethod(nameof(XElement.Add), [typeof(object)])!,
+            typeof(XElement).GetMethod(nameof(XElement.Add), [typeof(object)]),
             Expression.Convert(contentValue, typeof(object)));
 
     /// <summary>
@@ -68,7 +68,7 @@ public static class ExpressionTreeExt
     /// <returns></returns>
     public static Expression XElementNew(this string newElementName, string xmlNamespace) =>
         Expression.New(
-            typeof(XElement).GetConstructor([typeof(XName)])!,
+            typeof(XElement).GetConstructor([typeof(XName)]),
             newElementName.XName(xmlNamespace));
 
     /// <summary>
@@ -98,7 +98,7 @@ public static class ExpressionTreeExt
     public static Expression XElementElement(this Expression sourceXml, string termName, string? xmlNamespace = null) =>
         Expression.Call(
             sourceXml,
-            typeof(XContainer).GetMethod(nameof(XContainer.Element), [typeof(XName)])!,
+            typeof(XContainer).GetMethod(nameof(XContainer.Element), [typeof(XName)]),
             termName.XName(xmlNamespace));
 
     /// <summary>
@@ -123,11 +123,11 @@ public static class ExpressionTreeExt
         var enumeratorType = typeof(IEnumerator<>).MakeGenericType(elementType);
 
         var enumeratorVar = Expression.Variable(enumeratorType, enumeratorName);
-        var getEnumeratorCall = Expression.Call(collection, enumerableType.GetMethod(nameof(IEnumerable.GetEnumerator))!);
+        var getEnumeratorCall = Expression.Call(collection, enumerableType.GetMethod(nameof(IEnumerable.GetEnumerator)));
         var enumeratorAssign = Expression.Assign(enumeratorVar, getEnumeratorCall);
 
         // The MoveNext method's actually on IEnumerator, not IEnumerator<T>
-        var moveNextCall = Expression.Call(enumeratorVar, typeof(IEnumerator).GetMethod(nameof(IEnumerator.MoveNext))!);
+        var moveNextCall = Expression.Call(enumeratorVar, typeof(IEnumerator).GetMethod(nameof(IEnumerator.MoveNext)));
 
         var breakLabel = Expression.Label("LoopBreak_" + enumeratorName);
 
@@ -162,7 +162,7 @@ public static class ExpressionTreeExt
 
         return Expression.Call(
             typeof(Enumerable).GetMethods().Single(m => m.Name == nameof(Enumerable.Count) && m.GetParameters().Length == 1)
-                .MakeGenericMethod(resType.GetEnumeratedType()!),
+                .MakeGenericMethod(resType.GetEnumeratedType()),
             iEnumerableCollection);
     }
 
@@ -182,7 +182,7 @@ public static class ExpressionTreeExt
             typeof(Enumerable)
                 .GetMethods()
                 .Single(m => m.Name == nameof(Enumerable.First) && m.GetParameters().Length == 1)
-                .MakeGenericMethod(resType.GetEnumeratedType()!),
+                .MakeGenericMethod(resType.GetEnumeratedType()),
             iEnumerableCollection);
     }
 
@@ -200,14 +200,14 @@ public static class ExpressionTreeExt
             throw new ArgumentNullException(nameof(value));
 
         var resType = listCollection.Type;
-        var itemType = resType.GetEnumeratedType()!;
+        var itemType = resType.GetEnumeratedType();
 
         if (value.Type != itemType)
             value = Expression.Convert(value, itemType);
 
         return Expression.Call(
             listCollection,
-            resType.GetMethod(nameof(IList.Add), [itemType])!,
+            resType.GetMethod(nameof(IList.Add), [itemType]),
             value);
     }
 
@@ -219,7 +219,7 @@ public static class ExpressionTreeExt
     public static Expression IsNullOrWhiteSpace(this Expression stringValue) =>
         stringValue is null
             ? throw new ArgumentNullException(nameof(stringValue))
-            : Expression.Call(typeof(StringExt).GetMethod(nameof(StringExt.IsNullOrWhiteSpace))!, stringValue);
+            : Expression.Call(typeof(StringExt).GetMethod(nameof(StringExt.IsNullOrWhiteSpace)), stringValue);
 
     /// <summary>
     /// Вызов расширения <see cref="CollectionExt.JoinValuesToString{T}(IEnumerable{T}, string, bool, string)"/> для строки
@@ -232,7 +232,7 @@ public static class ExpressionTreeExt
     public static Expression JoinValuesToString(this Expression collection, string separator = ",", bool distinct = true, string? format = null) =>
         collection is null
             ? throw new ArgumentNullException(nameof(collection))
-            : Expression.Call(typeof(CollectionExt).GetMethod(nameof(CollectionExt.JoinValuesToString))!.MakeGenericMethod(collection.Type.GenericTypeArguments),
+            : Expression.Call(typeof(CollectionExt).GetMethod(nameof(CollectionExt.JoinValuesToString)).MakeGenericMethod(collection.Type.GenericTypeArguments),
                 collection,
                 Expression.Constant(separator, typeof(string)),
                 Expression.Constant(distinct),

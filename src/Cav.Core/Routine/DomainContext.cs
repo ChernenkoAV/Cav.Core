@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace Cav;
@@ -93,7 +93,7 @@ public static class DomainContext
     {
         get
         {
-            var tempPath = Path.Combine(Environment.GetEnvironmentVariable("TEMP", EnvironmentVariableTarget.Machine)!, NameEntryAssembly);
+            var tempPath = Path.Combine(Environment.GetEnvironmentVariable("TEMP", EnvironmentVariableTarget.Machine).ThrowIfNull(), NameEntryAssembly);
             if (!Directory.Exists(tempPath))
                 Directory.CreateDirectory(tempPath);
             return tempPath;
@@ -104,12 +104,12 @@ public static class DomainContext
     /// Имя сборки, из которого запущенно приложение (имя exe файла) (ТОЛЬКО ЕСЛИ ЭТО НЕ COM!!!)
     /// При работе в IIS бесмысленно, ибо там всегда процесс w3c. вроде. Какой-то один, короче...
     /// </summary>
-    public static string NameEntryAssembly => Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly()!.Location);
+    public static string NameEntryAssembly => Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location);
 
     /// <summary>Запуск приложения с администраторскими правами</summary>
     /// <param name="fileName">Файл приложения для запуска</param>
     /// <param name="arguments">аргументы приложения</param>
-    public static Process RunAsAdmin(string fileName, string? arguments = null)
+    public static Process? RunAsAdmin(string fileName, string? arguments = null)
     {
         var processInfo = new ProcessStartInfo
         {
@@ -119,6 +119,6 @@ public static class DomainContext
             Verb = "runas" // здесь вся соль
         };
 
-        return Process.Start(processInfo)!;
+        return Process.Start(processInfo);
     }
 }

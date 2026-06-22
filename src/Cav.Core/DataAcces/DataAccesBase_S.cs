@@ -51,7 +51,7 @@ public class DataAccesBase<TRow, TSelectParams> : DataAccesBase, IDataAcces<TRow
                 res.Add(row);
             }
 
-        return res.ToArray();
+        return [.. res];
     }
 
     /// <summary>
@@ -92,7 +92,7 @@ public class DataAccesBase<TRow, TSelectParams> : DataAccesBase, IDataAcces<TRow
                 res.Add(row);
             }
 
-        return res.ToArray();
+        return [.. res];
     }
 
     /// <summary>
@@ -209,7 +209,7 @@ public class DataAccesBase<TRow, TSelectParams> : DataAccesBase, IDataAcces<TRow
             ? Expression.Lambda<Func<object>>(valueExp).Compile()()
             : ((valueExp as UnaryExpression).Operand as LambdaExpression).Compile().DynamicInvoke(obj);
 
-        d.Add(name, val!);
+        d.Add(name, val);
     }
 
     private bool flagConfigured;

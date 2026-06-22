@@ -81,7 +81,7 @@ dotnet_diagnostic.IDE0028.severity = warning #IDE0028 Используйте и�
 dotnet_diagnostic.IDE0290.severity = warning #IDE0290: Использовать основной конструктор
 dotnet_diagnostic.IDE0300.severity = warning #IDE0300: Инициализацию коллекции можно упростить.
 dotnet_diagnostic.IDE0301.severity = warning #IDE0301 Инициализацию коллекции можно упростить.
-dotnet_diagnostic.IDE0305.severity = suggestion #IDE0305: Инициализацию коллекции можно упростить.
+dotnet_diagnostic.IDE0305.severity = warning #IDE0305: Инициализацию коллекции можно упростить.
 dotnet_diagnostic.IDE0090.severity = warning #IDE0090: выражение new можно упростить
 dotnet_diagnostic.IDE0220.severity = warning #IDE0220: Добавление явного приведения в цикл foreach
 

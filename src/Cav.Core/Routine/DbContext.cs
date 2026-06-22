@@ -108,5 +108,5 @@ public static class DbContext
     /// <summary>
     /// Имена соединений, присутствующие в коллекции
     /// </summary>
-    public static ReadOnlyCollection<string> NamesConnectionOnCollection => new(dcsb.Keys.ToArray());
+    public static ReadOnlyCollection<string> NamesConnectionOnCollection => new([.. dcsb.Keys]);
 }

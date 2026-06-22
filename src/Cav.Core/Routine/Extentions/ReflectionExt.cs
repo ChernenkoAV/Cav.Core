@@ -19,7 +19,7 @@ public static class ReflectionExt
             ? throw new ArgumentNullException(nameof(obj))
             : string.IsNullOrWhiteSpace(propertyName)
                 ? throw new ArgumentException($"\"{nameof(propertyName)}\" не может быть пустым или содержать только пробел.", nameof(propertyName))
-                : obj.GetType().GetProperty(propertyName)!.GetValue(obj);
+                : obj.GetType().GetProperty(propertyName).GetValue(obj);
     /// <summary>
     /// Получение значения статического свойства / константного поля
     /// </summary>
@@ -40,7 +40,7 @@ public static class ReflectionExt
         object? res = null;
         var prop = type.GetProperty(namePropertyOrField);
 
-        res = prop != null ? prop.GetValue(null) : type.GetField(namePropertyOrField)!.GetValue(null);
+        res = prop != null ? prop.GetValue(null) : type.GetField(namePropertyOrField).GetValue(null);
 
         return res;
     }
@@ -77,7 +77,7 @@ public static class ReflectionExt
     public static ReadOnlyCollection<T> GetStaticPropertys<T>(this Type type) =>
         type is null
             ? throw new ArgumentNullException(nameof(type))
-            : new ReadOnlyCollection<T>(type.GetStaticPropertys(typeof(T)).Cast<T>().ToArray());
+            : new ReadOnlyCollection<T>([.. type.GetStaticPropertys(typeof(T)).Cast<T>()]);
 
     /// <summary>
     /// Получение значений статических полей коллекцией
@@ -109,7 +109,7 @@ public static class ReflectionExt
     /// <param name="type">Просматреваемый тип</param>
     /// <returns></returns>
     public static ReadOnlyCollection<T> GetStaticFields<T>(this Type type) =>
-        new(type.GetStaticFields(typeof(T)).Cast<T>().ToArray());
+        new([.. type.GetStaticFields(typeof(T)).Cast<T>()]);
 
     /// <summary>
     /// Установка значения свойства
@@ -122,7 +122,7 @@ public static class ReflectionExt
         if (obj is null)
             throw new ArgumentNullException(nameof(obj));
 
-        obj.GetType().GetProperty(propertyName)!.SetValue(obj, value);
+        obj.GetType().GetProperty(propertyName).SetValue(obj, value);
     }
     /// <summary>
     /// Создание экземпляра класса
@@ -177,8 +177,8 @@ public static class ReflectionExt
         if (string.IsNullOrWhiteSpace(methodName))
             throw new ArgumentException($"\"{nameof(methodName)}\" не может быть пустым или содержать только пробел.", nameof(methodName));
 
-        var minfo = obj.GetType().GetMethod(methodName, arg.Select(x => x.GetType()).ToArray());
-        return minfo!.Invoke(obj, arg);
+        var minfo = obj.GetType().GetMethod(methodName, [.. arg.Select(x => x.GetType())]);
+        return minfo.Invoke(obj, arg);
     }
     /// <summary>
     /// Вызов статического метода
@@ -202,8 +202,8 @@ public static class ReflectionExt
         var rtType = asm.ExportedTypes
             .Single(x => x.Name == className);
 
-        var mi = rtType.GetMethod(methodName, args.Select(x => x.GetType()).ToArray());
-        return mi!.Invoke(null, args);
+        var mi = rtType.GetMethod(methodName, [.. args.Select(x => x.GetType())]);
+        return mi.Invoke(null, args);
     }
 
     /// <summary>

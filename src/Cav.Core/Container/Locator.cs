@@ -101,7 +101,7 @@ public static class Locator
 
         try
         {
-            res = constructor.Invoke(paramConstr.ToArray());
+            res = constructor.Invoke([.. paramConstr]);
         }
         catch (Exception ex)
         {
@@ -161,24 +161,24 @@ public static class Locator
 
     private static void puhStackAndCheckRecursion(Type typeInstance)
     {
-        var type = pathDependency.Value!.FirstOrDefault(x => x == typeInstance.FullName);
-        if (type != null)
+        var fullName = typeInstance.FullName;
+        if (pathDependency.Value.Contains(fullName))
         {
             var promDep = new List<string>();
             string? parDep = null;
 
             do
             {
-                parDep = pathDependency.Value!.Pop();
+                parDep = pathDependency.Value.Pop();
                 promDep.Add(parDep);
 
-            } while (parDep != type);
+            } while (parDep != fullName);
 
-            var msg = $"{Enumerable.Reverse(promDep.ToArray()).JoinValuesToString(" -> ")} -> {type}";
+            var msg = $"{Enumerable.Reverse(promDep.ToArray()).JoinValuesToString(" -> ")} -> {fullName}";
             throw new InvalidOperationException("Обнаружена рекурсивная зависимость: " + msg);
         }
 
-        pathDependency.Value!.Push(typeInstance.FullName!);
+        pathDependency.Value.Push(fullName);
     }
 
     /// <summary>
@@ -231,7 +231,7 @@ public static class Locator
     /// </summary>
     /// <typeparam name="T">Тип-родитель</typeparam>
     /// <returns>Массив объектов типов-наследников</returns>
-    public static T[] GetInstances<T>() => GetInstances(typeof(T)).Cast<T>().ToArray();
+    public static T[] GetInstances<T>() => [.. GetInstances(typeof(T)).Cast<T>()];
 
     /// <summary>
     /// Хелпер для локатора
@@ -278,7 +278,8 @@ public static class Locator
 
             var res = new List<Type>();
 
-            List<Type> filterTypes(IEnumerable<Type> inLi) => inLi
+            List<Type> filterTypes(IEnumerable<Type> inLi) => [..
+                inLi
                 .Where(x =>
                     !x.IsAbstract &&
                     !x.IsInterface &&
@@ -286,14 +287,13 @@ public static class Locator
                     !typeof(Attribute).IsAssignableFrom(x) &&
                     !x.GenericTypeArguments.Any() &&
                     !x.GetTypeInfo().GenericTypeParameters.Any() &&
-                    x.GetConstructors().Any())
-                .ToList();
+                    x.GetConstructors().Any())];
 
             foreach (var aitem in assemblysForWork)
             {
                 try
                 {
-                    res.AddRange(filterTypes(aitem.DefinedTypes.Select(x => x.AsType()).ToArray()));
+                    res.AddRange(filterTypes([.. aitem.DefinedTypes.Select(x => x.AsType())]));
                 }
                 catch
                 {

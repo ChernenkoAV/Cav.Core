@@ -35,12 +35,12 @@ public static class ExceptionExt
         if (!ex.StackTrace.IsNullOrWhiteSpace())
             builder.AppendLine($"StackTrace: {ex.StackTrace}");
 
-        if (ex is ReflectionTypeLoadException reflectEx && reflectEx.LoaderExceptions != null)
+        if (ex is ReflectionTypeLoadException reflectEx && reflectEx.LoaderExceptions is not null)
         {
             builder.AppendLine(padder);
             builder.AppendLine("LoaderExceptions:");
-            foreach (var rEx in reflectEx.LoaderExceptions.Where(x => x != null))
-                builder.AppendLine(rEx!.Expand(refinedDecoding));
+            foreach (var rEx in reflectEx.LoaderExceptions.Where(x => x is not null))
+                builder.AppendLine(rEx.Expand(refinedDecoding));
         }
 
         if (ex.InnerException != null)
@@ -74,7 +74,7 @@ public static class ExceptionExt
         var res = new Dictionary<string, object?>();
 
         foreach (var item in ex.Data.Keys)
-            res.Add(item!.ToString()!, ex.Data[item]);
+            res.Add(item.ToString(), ex.Data[item]);
 
         return res;
     }
@@ -105,9 +105,9 @@ public static class ExceptionExt
         if (valStr.IsNullOrWhiteSpace())
             return;
 
-        if (ex.Data.Contains(key!))
-            ex.Data.Remove(key!);
-        ex.Data.Add(key!, valStr);
+        if (ex.Data.Contains(key))
+            ex.Data.Remove(key);
+        ex.Data.Add(key, valStr);
     }
 
 #if NET8_0_OR_GREATER

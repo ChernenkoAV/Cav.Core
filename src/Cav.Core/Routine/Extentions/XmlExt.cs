@@ -25,7 +25,7 @@ public static class XmlExt
         if (rootAttrib != null)
             key = $"{key}:{rootAttrib.Namespace}:{rootAttrib.ElementName}";
 
-        return cacheXmlSer.GetOrAdd(key!, _ => new Lazy<XmlSerializer>(() => new XmlSerializer(type, rootAttrib), LazyThreadSafetyMode.ExecutionAndPublication)).Value;
+        return cacheXmlSer.GetOrAdd(key, _ => new Lazy<XmlSerializer>(() => new XmlSerializer(type, rootAttrib), LazyThreadSafetyMode.ExecutionAndPublication)).Value;
     }
 
     /// <summary>
@@ -138,7 +138,7 @@ public static class XmlExt
             ? throw new ArgumentNullException(nameof(type))
             : xml.IsNullOrWhiteSpace()
                 ? type.GetDefault()
-                : XDocument.Parse(xml!).XMLDeserialize(type);
+                : XDocument.Parse(xml).XMLDeserialize(type);
 
     /// <summary>
     /// Десиарелизатор из файла
@@ -241,12 +241,12 @@ public static class XmlExt
         XmlSchema xs;
         using (var sr = new StringReader(xsd.ToString()))
         using (var xr = XmlReader.Create(sr))
-            xs = XmlSchema.Read(xr, (a, b) => res += b.Message + Environment.NewLine)!;
+            xs = XmlSchema.Read(xr, (a, b) => res += b.Message + Environment.NewLine);
 
         if (!res.IsNullOrWhiteSpace())
             return res;
 
-        if (xml.Root!.Name.NamespaceName != (xs.TargetNamespace ?? string.Empty))
+        if (xml.Root.Name.NamespaceName != (xs.TargetNamespace ?? string.Empty))
             return $"пространство имен '{xml.Root.Name.NamespaceName}' элемента '{xml.Root.Name.LocalName}' не соответствует целевому пространству имен схемы '{xs.TargetNamespace ?? string.Empty}'";
 
         var shs = new XmlSchemaSet();

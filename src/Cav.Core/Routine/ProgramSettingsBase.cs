@@ -78,14 +78,14 @@ public abstract class ProgramSettingsBase<T> : IDisposable
     {
         var instance = Activator.CreateInstance<T>();
 
-        var filename = typeof(T).GetCustomAttribute<ProgramSettingsFileAttribute>()?.FileName!;
+        var filename = typeof(T).GetCustomAttribute<ProgramSettingsFileAttribute>()?.FileName;
 
         if (filename.IsNullOrWhiteSpace())
             filename = typeof(T).FullName + ".json";
 
-        filename = filename.ReplaceInvalidPathChars()!;
+        filename = filename.ReplaceInvalidPathChars();
 
-        instance.fileNameApp = Path.Combine(Path.GetDirectoryName(typeof(T).Assembly.Location)!, filename);
+        instance.fileNameApp = Path.Combine(Path.GetDirectoryName(typeof(T).Assembly.Location), filename);
         instance.fileNameUserRoaming = Path.Combine(DomainContext.AppDataUserStorageRoaming, filename);
         instance.fileNameUserLocal = Path.Combine(DomainContext.AppDataUserStorageLocal, filename);
         instance.fileNameAppCommon = Path.Combine(DomainContext.AppDataCommonStorage, filename);
@@ -128,12 +128,12 @@ public abstract class ProgramSettingsBase<T> : IDisposable
             if (!settingsFiles.Any())
                 return;
 
-            var joS = JToken.Parse(File.ReadAllText(settingsFiles.First()!));
+            var joS = JToken.Parse(File.ReadAllText(settingsFiles.First()));
 
             var targetJson = new JObject();
 
             foreach (var jo in settingsFiles
-                .SelectMany(x => JObject.Parse(File.ReadAllText(x!)).Children())
+                .SelectMany(x => JObject.Parse(File.ReadAllText(x)).Children())
                 .Select(x => (JProperty)x)
                 .GroupBy(x => x.Name)
                 .ToArray())

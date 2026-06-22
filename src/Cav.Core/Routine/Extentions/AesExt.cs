@@ -16,12 +16,12 @@ public static class AesExt
     /// <returns>Зашифрованный объект</returns>
     public static byte[]? SerializeAesEncrypt(this object? obj, string key)
     {
-        if (obj == null)
+        if (obj is null)
             return null;
 
         var keyByte = key.ComputeMD5ChecksumString().ToByteArray();
         var ivByte = keyByte.ComputeMD5Checksum().ToByteArray();
-        var data = Encoding.UTF8.GetBytes(obj.JsonSerialize()!).GZipCompress();
+        var data = Encoding.UTF8.GetBytes(obj.JsonSerialize()).GZipCompress();
 
         using (var aes = Aes.Create())
         {
