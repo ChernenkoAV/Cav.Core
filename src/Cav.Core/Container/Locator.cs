@@ -174,7 +174,7 @@ public static class Locator
 
             } while (parDep != type);
 
-            var msg = $"{promDep.ToArray().Reverse().JoinValuesToString(" -> ")} -> {type}";
+            var msg = $"{Enumerable.Reverse(promDep.ToArray()).JoinValuesToString(" -> ")} -> {type}";
             throw new InvalidOperationException("Обнаружена рекурсивная зависимость: " + msg);
         }
 

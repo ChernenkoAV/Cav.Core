@@ -213,7 +213,13 @@ public class DataAccesBase<TRow, TSelectParams> : DataAccesBase, IDataAcces<TRow
     }
 
     private bool flagConfigured;
-    private object lockObj = new();
+    private
+#if NET10_0_OR_GREATER
+    Lock
+#else
+    object
+#endif
+    lockObj = new();
     internal void Configured()
     {
         lock (lockObj)
