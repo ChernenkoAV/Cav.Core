@@ -18,15 +18,8 @@ public static class GuidExt
     /// </summary>
     /// <param name="strGuid"></param>
     /// <returns>null, if string null</returns>
-    public static Guid? GuidFromShortString(this string strGuid)
-    {
-        Guid? res = null;
-
-        if (strGuid.IsNullOrWhiteSpace())
-            return res;
-
-        strGuid = strGuid.Replace('_', '/').Replace('-', '+') + "==";
-
-        return new Guid(Convert.FromBase64String(strGuid));
-    }
+    public static Guid? GuidFromShortString(this string? strGuid) =>
+        strGuid.IsNullOrWhiteSpace()
+            ? null
+            : new Guid(Convert.FromBase64String(strGuid!.Replace('_', '/').Replace('-', '+') + "=="));
 }
