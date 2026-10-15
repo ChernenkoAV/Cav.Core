@@ -12,12 +12,12 @@ namespace Cav;
 /// </summary>
 public static class JsonExt
 {
-    private static GenericJsonSerializerSetting getJsetting(
+    private static JsonSerializerSetting getJsetting(
         StreamingContextStates state,
         object? additional = null) =>
             state != 0
-                ? new GenericJsonSerializerSetting(state, additional)
-                : GenericJsonSerializerSetting.Instance;
+                ? new JsonSerializerSetting(state, additional)
+                : JsonSerializerSetting.Instance;
 
     /// <summary>
     /// Json сериализация (c наполением контекста). null не выводятся. Пустые <see cref="IEnumerable"/> тождественны null.

@@ -2,6 +2,7 @@
 
 using System.Collections.Concurrent;
 using System.Data.Common;
+using System.Diagnostics;
 
 namespace Cav;
 
@@ -16,14 +17,15 @@ public delegate void DbTransactionScopeEnd(string connName);
 /// </summary>
 public sealed class DbTransactionScope : IDisposable
 {
-
     private bool complete;
     private string connName;
     private static AsyncLocal<Guid?> rootTran = new();
+    private static AsyncLocal<bool> needRolback = new() { Value = false };
 
     private static ConcurrentDictionary<string, DbTransaction> transactions = [];
 
     private readonly Guid currentTran;
+    private readonly bool isRootTran;
 
     private static string getKeyTran(string? conName) =>
         $"{conName ?? DbContext.defaultNameConnection}|{rootTran.Value ?? Guid.NewGuid()}";
@@ -34,18 +36,27 @@ public sealed class DbTransactionScope : IDisposable
     /// <param name="connectionName">Имя соедиенения, для которого назначается транзакция</param>
     public DbTransactionScope(string? connectionName = null)
     {
+        using var beginTranActivity = Activity.Current?.Source.StartNewActivity("transaction begin");
         currentTran = Guid.NewGuid();
+
+        beginTranActivity?.AddTag("transaction.id", currentTran);
 
         connName = connectionName ??= DbContext.defaultNameConnection;
 
-        if (rootTran.Value == null)
-            rootTran.Value = currentTran;
+        rootTran.Value ??= currentTran;
 
-        if (rootTran.Value != currentTran)
+        isRootTran = rootTran.Value == currentTran;
+
+        beginTranActivity?.AddTag("transaction.kind", isRootTran ? "root" : "nested");
+
+        if (!isRootTran)
             return;
 
         if (!transactions.TryGetValue(getKeyTran(connName), out var transaction))
+        {
             transactions.AddOrUpdate(getKeyTran(connName), DbContext.Connection(connName).BeginTransaction(), (k, t) => t);
+            beginTranActivity?.AddTag("transaction.state", "create");
+        }
     }
 
     internal static DbTransaction? TransactionGet(string? connectionName = null)
@@ -69,59 +80,71 @@ public sealed class DbTransactionScope : IDisposable
     /// </summary>
     public void Dispose()
     {
-        var tranKey = getKeyTran(connName);
-        transactions.TryGetValue(tranKey, out var tran);
+        using var endTranActivity = Activity.Current?.Source.StartNewActivity("transaction end");
 
-        if (tran != null && !complete)
-        {
-            transactions.TryRemove(tranKey, out var _);
-            rootTran.Value = null;
+        endTranActivity?.AddTag("transaction.id", currentTran.ToString());
+        endTranActivity?.AddTag("transaction.kind", isRootTran ? "root" : "nested");
+        endTranActivity?.AddTag("transaction.complete", complete);
 
-            var conn = tran.Connection;
-#if NET7_0_OR_GREATER
-            tran.RollbackAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-            tran.Dispose();
+        //если эту (а эта может быть корневой или какая-то вложенная)
+        // не пометили, что она ок, то надо ролбэчить
+        if (!complete)
+            needRolback.Value = true;
 
-            conn?.Dispose();
-#else
-            try
-            {
-                tran.Rollback();
-            }
-            catch { }
-
-            try
-            {
-                tran.Dispose();
-            }
-            catch { }
-
-            try
-            {
-                conn?.Dispose();
-            }
-            catch { }
-#endif
-
-            TransactionRollback?.Invoke(connName);
-        }
-
-        if (rootTran.Value != currentTran)
+        // если это не корневая транзанкция - выходим.
+        if (!isRootTran)
             return;
 
-        if (tran != null)
+        transactions.TryRemove(getKeyTran(connName), out var tran);
+        var connection = tran.Connection;
+        rootTran.Value = null;
+
+        try
         {
-            transactions.TryRemove(tranKey, out var _);
-            rootTran.Value = null;
+            if (tran is null)
+            {
+                endTranActivity?.AddEvent(new("tran is null"));
+                endTranActivity?.SetStatus(ActivityStatusCode.Error);
+                return;
+            }
 
-            var conn = tran.Connection;
+            if (connection is null)
+            {
+                endTranActivity?.AddEvent(new("connection is null"));
+                endTranActivity?.SetStatus(ActivityStatusCode.Error);
+                return;
+            }
 
-            tran.Commit();
-            tran.Dispose();
+            if (needRolback.Value)
+            {
+                // ролбэчим
+                endTranActivity?.AddTag("transaction.state", "rollback");
 
-            conn.Dispose();
+                tran.Rollback();
 
-            TransactionCommit?.Invoke(connName);
+                TransactionRollback?.Invoke(connName);
+            }
+            else
+            {
+                // коммитим
+                endTranActivity?.AddTag("transaction.state", "commit");
+
+                tran.Commit();
+
+                TransactionCommit?.Invoke(connName);
+            }
+        }
+        catch
+        {
+            endTranActivity?.AddEvent(new("set state error"));
+            endTranActivity?.SetStatus(ActivityStatusCode.Error);
+            throw;
+        }
+        finally
+        {
+            tran?.Dispose();
+            connection?.Dispose();
+            tran = null;
         }
     }
 

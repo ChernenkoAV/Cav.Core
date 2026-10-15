@@ -115,6 +115,7 @@ public abstract class ValueObjectGuid : ValueObject<Guid>
 
 /// <summary>
 /// Конвертор для json сериализации-десериализации (Newtonsoft.Json). Указывается для конечного типа значения.
+/// <para>Использование: атрибут к целевому типу по примеру [JsonConverter(typeof(JsonValueValueObjectConverter&lt;TargetType, string&gt;))]</para>
 /// </summary>
 /// <typeparam name="T">Конечный тип "типизированного" типа значения</typeparam>
 /// <typeparam name="TV">Базовый тип, на основе которого построен "тип значения"</typeparam>
@@ -145,6 +146,7 @@ public class JsonValueValueObjectConverter<T, TV> : JsonConverter
 /// <summary>
 /// Кастомный конвертер типов для "типизированных значений строк". Необходим для корректной атоматической работы фабрик,
 /// которые могут принимать простые типы на вход и маппить их в параметры (ASP NET Core)
+/// <para>Использование: атрибут к целевому типу по примеру [TypeConverter(typeof(ValueObjectStringTypeConverter&lt;TargetType&gt;))]</para>
 /// </summary>
 /// <typeparam name="T">Конечный тип "типизированного" типа значения</typeparam>
 public class ValueObjectStringTypeConverter<T> : TypeConverter where T : ValueObjectString
