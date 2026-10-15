@@ -8,7 +8,7 @@ namespace Cav;
 /// </summary>
 public static class DbContext
 {
-    internal const string defaultNameConnection = "DefaultNameConnectionForConnectionCollectionOnDomainContext";
+    internal const string defaultNameConnection = "Default";
 
     /// <summary>
     /// Коллекция настроек соединения с БД
