@@ -1,7 +1,7 @@
 namespace Cav;
 
 /// <summary>
-/// Конвертирование <see cref="DateTime"/> по фомату. По умолчанию "yyyy-MM-dd". Для указания своего формата используйте параметризированный конструктор
+/// Конвертирование <see cref="DateTime"/> по фомату. По умолчанию "yyyy-MM-dd"
 /// </summary>
 [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
 public sealed class JsonDateTimeFormatAttribute : Attribute

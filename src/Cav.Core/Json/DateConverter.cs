@@ -5,7 +5,7 @@ namespace Cav.Json;
 /// <summary>
 /// Конвертирование <see cref="DateTime"/> по фомату. По умолчанию "yyyy-MM-dd". Для указания своего формата используйте параметризированный конструктор
 /// </summary>
-//[Obsolete("Используйте Cav.JsonDateConverter")]
+[Obsolete("Используйте Cav.JsonDateConverter")]
 public class DateConverter : IsoDateTimeConverter
 {
     /// <summary>
