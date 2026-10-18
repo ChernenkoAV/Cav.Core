@@ -5,7 +5,7 @@ namespace Cav;
 public static class TelemetryExt
 {
     /// <summary>
-    /// Запус новой "внутренней" <see cref="ActivityKind.Internal"/> активности без указания парента
+    /// Запуск новой "внутренней" <see cref="ActivityKind.Internal"/> активности
     /// </summary>
     /// <param name="activitySource"></param>
     /// <param name="name"></param>
