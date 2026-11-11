@@ -17,7 +17,7 @@
 
     <ItemGroup>
         <PackageReference Include="Newtonsoft.Json" Version="13.*" />
-        <PackageReference Include="System.Runtime.Caching" Version="*" />
+        <PackageReference Include="System.Runtime.Caching" Version="10.*" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">

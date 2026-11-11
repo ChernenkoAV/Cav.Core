@@ -16,5 +16,5 @@ public sealed class JsonDateTimeFormatAttribute : Attribute
     /// </summary>
     public JsonDateTimeFormatAttribute(string dateTimeFormat) => DateTimeFormat = dateTimeFormat.ThrowIfNull();
 
-    public string DateTimeFormat { get; set; } = "yyyy-MM-dd";
+    internal string DateTimeFormat { get; set; } = "yyyy-MM-dd";
 }
