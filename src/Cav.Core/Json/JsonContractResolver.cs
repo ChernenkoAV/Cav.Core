@@ -12,6 +12,8 @@ internal class JsonContractResolver : DefaultContractResolver
     {
         var jProperty = base.CreateProperty(member, memberSerialization);
 
+        var propertyType = Nullable.GetUnderlyingType(jProperty.PropertyType) ?? jProperty.PropertyType!;
+
         var nullEnumerableValueProvider = NullEnumerableValueProvider.Create(jProperty);
 
         if (nullEnumerableValueProvider is not null)
@@ -25,13 +27,13 @@ internal class JsonContractResolver : DefaultContractResolver
             jProperty.DefaultValueHandling = DefaultValueHandling.Populate;
         }
 
-        if (jProperty.PropertyType == typeof(string))
+        if (propertyType == typeof(string))
             jProperty.ValueProvider = new StringNullEmtyValueProvider(jProperty);
 
-        if (jProperty.PropertyType!.IsEnum)
+        if (propertyType.IsEnum)
             jProperty.DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate;
 
-        if (jProperty.PropertyType == typeof(DateTime))
+        if (propertyType == typeof(DateTime))
         {
             var jsonDateTimeConverterAttrib = member.GetCustomAttribute<JsonDateTimeFormatAttribute>();
             if (jsonDateTimeConverterAttrib is not null)
