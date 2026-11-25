@@ -14,18 +14,7 @@ internal class JsonContractResolver : DefaultContractResolver
 
         var propertyType = Nullable.GetUnderlyingType(jProperty.PropertyType) ?? jProperty.PropertyType!;
 
-        var nullEnumerableValueProvider = NullEnumerableValueProvider.Create(jProperty);
-
-        if (nullEnumerableValueProvider is not null)
-        {
-            var olsShouldSerialise = jProperty.ShouldSerialize ?? (x => true);
-
-            jProperty.ShouldSerialize = obj => olsShouldSerialise(obj) && jProperty.ValueProvider!.GetValue(obj) != null;
-
-            jProperty.ValueProvider = nullEnumerableValueProvider;
-            jProperty.NullValueHandling = NullValueHandling.Include;
-            jProperty.DefaultValueHandling = DefaultValueHandling.Populate;
-        }
+        NullEnumerableValueProvider.TrySet(member, jProperty);
 
         if (propertyType == typeof(string))
             jProperty.ValueProvider = new StringNullEmtyValueProvider(jProperty);
